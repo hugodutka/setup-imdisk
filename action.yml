@@ -46,3 +46,4 @@ runs:
 
         rm -rf "$GITHUB_WORKSPACE"/*
         imdisk -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
+        touch "$GITHUB_WORKSPACE"/test.txt
