@@ -1,38 +1,40 @@
-name: "Setup ImDisk"
+name: "Setup Arsenal Image Mounter"
 if: runner.os == 'Windows'
 description: |
-  Sets up the ImDisk toolkit for Windows and backs often-used paths with RAM disks
+  Sets up the Arsenal Image Mounter for Windows and backs often-used paths with RAM disks
 runs:
   using: "composite"
   steps:
-    - name: Download ImDisk
-      if: runner.os == 'Windows'
+    - name: Download and install Arsenal Image Mounter
       shell: bash
       run: |
-        mkdir imdisk
-        cd imdisk
-        curl -L -o files.cab https://github.com/coder/imdisk-artifacts/raw/92a17839ebc0ee3e69be019f66b3e9b5d2de4482/files.cab
-        curl -L -o install.bat https://github.com/coder/imdisk-artifacts/raw/92a17839ebc0ee3e69be019f66b3e9b5d2de4482/install.bat
-        cd ..
+        set -e
 
-    - name: Install ImDisk
-      shell: cmd
-      run: |
-        cd imdisk
-        install.bat /silent
+        cd ~/
+
+        mkdir aim
+        cd aim
+        curl -L -o aim_ll.zip https://github.com/ArsenalRecon/Arsenal-Image-Mounter/raw/5961f922c5b99ec29acc4af4b60b909b402eed95/Command%20line%20applications/aim_ll.zip
+        unzip aim_ll.zip
+        mkdir ~/bin
+        mv x64/* ~/bin
+
+        curl -L -o DriverFiles.zip https://github.com/ArsenalRecon/Arsenal-Image-Mounter/raw/5961f922c5b99ec29acc4af4b60b909b402eed95/DriverSetup/DriverFiles.zip
+        unzip DriverFiles.zip -d DriverFiles
+        aim_ll --install DriverFiles
 
     - name: Create RAM Disks
       shell: bash
       run: |
         # RAM disk for postgres mounted on R:
-        imdisk -a -s 4096M -m R: -p "/fs:ntfs /q /y"
+        aim_ll -a -s 4096M -m R: -p "/fs:ntfs /q /y"
 
         # RAM disk for temp files. It's used by actions/cache, actions/setup-go, etc.
         # We need to persist the existing contents because some actions rely on it.
         mkdir "$RUNNER_TEMP"_tmp
         cp -r "$RUNNER_TEMP"/. "$RUNNER_TEMP"_tmp
         rm -rf "$RUNNER_TEMP"/*
-        imdisk -a -s 24576M -m "$RUNNER_TEMP" -p "/fs:ntfs /q /y"
+        aim_ll -a -s 24576M -m "$RUNNER_TEMP" -p "/fs:ntfs /q /y"
         cp -r "$RUNNER_TEMP"_tmp/. "$RUNNER_TEMP"
         rm -rf "$RUNNER_TEMP"_tmp
 
@@ -41,7 +43,7 @@ runs:
         # Use exfat instead of ntfs because ntfs creates an unremovable
         # "System Volume Information" directory that makes actions/checkout fail.
         # exfat is empty on creation
-        imdisk -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
+        aim_ll -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
         # node's fs.promises.readdir used by actions/checkout fails if the
         # directory is empty.
         touch "$GITHUB_WORKSPACE"/dummy.txt
