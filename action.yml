@@ -44,6 +44,5 @@ runs:
         imdisk -a -s 8192M -m "$GOCACHE" -p "/fs:ntfs /q /y"
         imdisk -a -s 8192M -m "$GOMODCACHE" -p "/fs:ntfs /q /y"
 
-        rm -rf "$GITHUB_WORKSPACE"
-        mkdir "$GITHUB_WORKSPACE"
-        imdisk -a -s 4096M -m "$GITHUB_WORKSPACE" -p "/fs:ntfs /q /y"
+        rm -rf "$GITHUB_WORKSPACE"/*
+        imdisk -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:ntfs /q /y"
