@@ -15,12 +15,15 @@ runs:
         mkdir aim
         cd aim
         curl -L -o aim_ll.zip https://github.com/ArsenalRecon/Arsenal-Image-Mounter/raw/5961f922c5b99ec29acc4af4b60b909b402eed95/Command%20line%20applications/aim_ll.zip
-        unzip aim_ll.zip
+        # unzip properly extracts everything but warns that "aim_ll.zip appears to use backslashes as path separators"
+        # it then exits with a non-zero status code. the warning is harmless, so we ignore it.
+        unzip aim_ll.zip || true
         mkdir ~/bin
         mv x64/* ~/bin
 
         curl -L -o DriverFiles.zip https://github.com/ArsenalRecon/Arsenal-Image-Mounter/raw/5961f922c5b99ec29acc4af4b60b909b402eed95/DriverSetup/DriverFiles.zip
-        unzip DriverFiles.zip -d DriverFiles
+        # like above
+        unzip DriverFiles.zip -d DriverFiles || true
         aim_ll --install DriverFiles
 
     - name: Create RAM Disks
