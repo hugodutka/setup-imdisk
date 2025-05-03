@@ -32,22 +32,9 @@ runs:
         mkdir "$RUNNER_TEMP"_tmp
         cp -r "$RUNNER_TEMP"/. "$RUNNER_TEMP"_tmp
         rm -rf "$RUNNER_TEMP"/*
-        imdisk -a -s 8192M -m "$RUNNER_TEMP" -p "/fs:ntfs /q /y"
+        imdisk -a -s 24576M -m "$RUNNER_TEMP" -p "/fs:ntfs /q /y"
         cp -r "$RUNNER_TEMP"_tmp/. "$RUNNER_TEMP"
         rm -rf "$RUNNER_TEMP"_tmp
-
-        # RAM disk for go cache and mod cache
-        # cd to another directory to ensure we're not inside a go project.
-        # That'd trigger go to download the toolchain for that project.
-        cd "$RUNNER_TEMP"
-        export GOCACHE="$(go env GOCACHE)"
-        export GOMODCACHE="$(go env GOMODCACHE)"
-        rm -rf "$GOCACHE"
-        rm -rf "$GOMODCACHE"
-        mkdir -p "$GOCACHE"
-        mkdir -p "$GOMODCACHE"
-        imdisk -a -s 8192M -m "$GOCACHE" -p "/fs:ntfs /q /y"
-        imdisk -a -s 8192M -m "$GOMODCACHE" -p "/fs:ntfs /q /y"
 
         # RAM disk for the repository
         rm -rf "$GITHUB_WORKSPACE"/*
