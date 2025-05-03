@@ -21,12 +21,14 @@ runs:
         cd imdisk
         install.bat /silent
 
-    - name: Create RAM Disk
+    - name: Create RAM Disks
       shell: bash
       run: |
+        # RAM disk for postgres mounted on R:
         imdisk -a -s 4096M -m R: -p "/fs:ntfs /q /y"
 
-        # bash
+        # RAM disk for temp files. It's used by actions/cache, actions/setup-go, etc.
+        # We need to persist the existing contents because some actions rely on it.
         mkdir "$RUNNER_TEMP"_tmp
         cp -r "$RUNNER_TEMP"/. "$RUNNER_TEMP"_tmp
         rm -rf "$RUNNER_TEMP"/*
@@ -34,6 +36,9 @@ runs:
         cp -r "$RUNNER_TEMP"_tmp/. "$RUNNER_TEMP"
         rm -rf "$RUNNER_TEMP"_tmp
 
+        # RAM disk for go cache and mod cache
+        # cd to another directory to ensure we're not inside a go project.
+        # That'd trigger go to download the toolchain for that project.
         cd "$RUNNER_TEMP"
         export GOCACHE="$(go env GOCACHE)"
         export GOMODCACHE="$(go env GOMODCACHE)"
@@ -44,6 +49,12 @@ runs:
         imdisk -a -s 8192M -m "$GOCACHE" -p "/fs:ntfs /q /y"
         imdisk -a -s 8192M -m "$GOMODCACHE" -p "/fs:ntfs /q /y"
 
+        # RAM disk for the repository
         rm -rf "$GITHUB_WORKSPACE"/*
+        # Use exfat instead of ntfs because ntfs creates an unremovable
+        # "System Volume Information" directory that makes actions/checkout fail.
+        # exfat is empty on creation
         imdisk -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
-        touch "$GITHUB_WORKSPACE"/test.txt
+        # node's fs.promises.readdir used by actions/checkout fails if the
+        # directory is empty.
+        touch "$GITHUB_WORKSPACE"/dummy.txt
