@@ -44,9 +44,5 @@ runs:
         imdisk -a -s 8192M -m "$GOCACHE" -p "/fs:ntfs /q /y"
         imdisk -a -s 8192M -m "$GOMODCACHE" -p "/fs:ntfs /q /y"
 
-        export WORKSPACE_PARENT="$(dirname $GITHUB_WORKSPACE)"
-        echo "WORKSPACE_PARENT: $WORKSPACE_PARENT"
-        ls -lah "$WORKSPACE_PARENT"
-        rm -rf "$WORKSPACE_PARENT"/*
-        mkdir -p "$GITHUB_WORKSPACE"
-        imdisk -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:ntfs /q /y"
+        rm -rf "$GITHUB_WORKSPACE"/*
+        imdisk -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
