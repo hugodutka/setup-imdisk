@@ -30,14 +30,14 @@ runs:
       shell: bash
       run: |
         # RAM disk for postgres mounted on R:
-        aim_ll -a -s 4096M -m R: -p "/fs:ntfs /q /y"
+        aim_ll -a -s "90%" -m R: -p "/fs:ntfs /q /y"
 
         # RAM disk for temp files. It's used by actions/cache, actions/setup-go, etc.
         # We need to persist the existing contents because some actions rely on it.
         mkdir "$RUNNER_TEMP"_tmp
         cp -r "$RUNNER_TEMP"/. "$RUNNER_TEMP"_tmp
         rm -rf "$RUNNER_TEMP"/*
-        aim_ll -a -s 24576M -m "$RUNNER_TEMP" -p "/fs:ntfs /q /y"
+        aim_ll -a -s "90%" -m "$RUNNER_TEMP" -p "/fs:ntfs /q /y"
         cp -r "$RUNNER_TEMP"_tmp/. "$RUNNER_TEMP"
         rm -rf "$RUNNER_TEMP"_tmp
 
@@ -46,7 +46,7 @@ runs:
         # Use exfat instead of ntfs because ntfs creates an unremovable
         # "System Volume Information" directory that makes actions/checkout fail.
         # exfat is empty on creation
-        aim_ll -a -s 2048M -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
+        aim_ll -a -s "90%" -m "$GITHUB_WORKSPACE" -p "/fs:exfat /q /y"
         # node's fs.promises.readdir used by actions/checkout fails if the
         # directory is empty.
         touch "$GITHUB_WORKSPACE"/dummy.txt
